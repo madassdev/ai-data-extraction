@@ -76,6 +76,22 @@ app.use(express.json({ limit: '64kb' }));
 app.use(express.static('public', { setHeaders: (res) => res.setHeader('Cache-Control', 'no-cache') }));
 
 app.get('/health', (_req, res) => res.json({ ok: true }));
+
+// Is the AI provider usable? A 1-token probe at start and every 15 minutes (refused, and free,
+// when there's no credit). The page uses it to steer visitors to the samples.
+const aiHealth = { ok: null };
+async function probeAi() {
+  try {
+    await client.messages.create({ model: 'claude-haiku-4-5', max_tokens: 1, messages: [{ role: 'user', content: 'ok' }] });
+    aiHealth.ok = true;
+  } catch (err) {
+    aiHealth.ok = !(err instanceof Anthropic.AuthenticationError || (err instanceof Anthropic.BadRequestError && /credit balance/i.test(err.message)));
+  }
+}
+if (AI_ENABLED) { probeAi(); setInterval(probeAi, 15 * 60_000).unref(); }
+app.get('/api/status', (_req, res) => res.json({
+  ai: !AI_ENABLED ? 'disabled' : usedToday >= DAILY_LIMIT || spentToday >= DAILY_BUDGET_USD ? 'daily_limit' : aiHealth.ok === false ? 'paused' : 'ok',
+}));
 app.get('/api/samples', (_req, res) => res.json(samples));
 app.get('/api/challenge', rateLimit({ windowMs: 10 * 60_000, limit: 30, standardHeaders: 'draft-8', legacyHeaders: false }), (_req, res) => res.json(issueChallenge()));
 
@@ -142,7 +158,8 @@ app.post('/api/extract', limiter, async (req, res) => {
     }
     if (err instanceof Anthropic.BadRequestError && /credit balance/i.test(err.message)) {
       console.error('anthropic: out of credit');
-      return res.status(503).json({ error: 'Live extraction of your own text is paused right now. The three samples above still work.' });
+      aiHealth.ok = false;
+      return res.status(503).json({ error: 'Live reading of your own text is paused right now. The three samples still work.', paused: true });
     }
     if (err instanceof Anthropic.APIError) {
       console.error('anthropic error', err.status, err.message);

@@ -3,361 +3,150 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Clean Data Demo</title>
-<meta name="description" content="Paste a messy WhatsApp report, invoice email or order chat. AI extracts the record, code checks every number, and anything doubtful is flagged for review.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230f766e'/><path d='M9 17l5 5 9-12' stroke='white' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<title>AI Data Extraction Demo</title>
+<meta name="description" content="Paste a messy WhatsApp report, invoice email or order chat. AI pulls out the numbers and simple checks catch the mistakes before they reach your books.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='9' fill='%23059669'/><path d='M9 11h14M9 16h14M9 21h8' stroke='white' stroke-width='2.6' stroke-linecap='round'/><circle cx='23' cy='22' r='4' fill='%23FB7185'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg: #f7f7f4; --surface: #ffffff; --surface-2: #f1f1ec; --border: #e3e3dc;
-  --text: #1b1d1c; --muted: #61655f; --accent: #0f766e; --accent-ink: #ffffff; --accent-soft: #e2f2ef;
-  --ok: #1a7f45; --ok-soft: #e4f4ea; --warn: #9a6400; --warn-soft: #fbf1dc; --err: #b42318; --err-soft: #fce8e6;
-  --info: #3b5bb5; --info-soft: #e8edfa;
-  --shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.04);
-  color-scheme: light;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #121413; --surface: #1a1d1c; --surface-2: #222624; --border: #2e3330;
-    --text: #e9ebe8; --muted: #9aa19c; --accent: #2bb3a3; --accent-ink: #062320; --accent-soft: #15302c;
-    --ok: #4cc983; --ok-soft: #15291d; --warn: #e3ab45; --warn-soft: #2d2412; --err: #f2766b; --err-soft: #331816;
-    --info: #8aa6f2; --info-soft: #1b2236; --shadow: none; color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #121413; --surface: #1a1d1c; --surface-2: #222624; --border: #2e3330;
-  --text: #e9ebe8; --muted: #9aa19c; --accent: #2bb3a3; --accent-ink: #062320; --accent-soft: #15302c;
-  --ok: #4cc983; --ok-soft: #15291d; --warn: #e3ab45; --warn-soft: #2d2412; --err: #f2766b; --err-soft: #331816;
-  --info: #8aa6f2; --info-soft: #1b2236; --shadow: none; color-scheme: dark;
-}
-* { box-sizing: border-box; }
-html, body { margin: 0; }
-body { background: var(--bg); color: var(--text); font: 15px/1.55 Inter, system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
-a { color: var(--accent); }
-.wrap { max-width: 1180px; margin: 0 auto; padding: 0 16px; }
-
-header.top { border-bottom: 1px solid var(--border); background: var(--surface); }
-header.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 60px; }
-.brand { display: flex; align-items: center; gap: 10px; font-weight: 600; }
-.brand .mark { width: 28px; height: 28px; border-radius: 7px; background: var(--accent); display: grid; place-items: center; }
-.brand small { color: var(--muted); font-weight: 400; }
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: 8px; padding: 8px 14px; font: inherit; font-weight: 500; cursor: pointer; text-decoration: none; white-space: nowrap; }
-.btn:hover { background: var(--surface-2); }
-.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-.btn.primary:hover { filter: brightness(1.07); }
-.btn:disabled { opacity: .55; cursor: not-allowed; }
-.btn.small { padding: 5px 10px; font-size: 13px; }
-
-.hero { padding: 40px 0 24px; }
-.hero h1 { font-size: clamp(26px, 4vw, 38px); line-height: 1.15; letter-spacing: -0.02em; margin: 0 0 12px; max-width: 760px; }
-.hero p { color: var(--muted); font-size: 17px; margin: 0; max-width: 680px; }
-.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 24px; }
-.step { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
-.step b { display: block; margin-bottom: 2px; }
-.step span { color: var(--muted); font-size: 14px; }
-.step .n { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 700; margin-right: 6px; }
-
-.grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 20px; align-items: start; padding-bottom: 40px; }
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); }
-.card-h { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.card-h h2 { font-size: 15px; margin: 0; }
-.card-b { padding: 18px; }
-.input-card { position: sticky; top: 16px; }
-
-.samples { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
-.sample { text-align: left; border: 1px solid var(--border); background: var(--surface-2); border-radius: 8px; padding: 9px 12px; cursor: pointer; font: inherit; color: var(--text); }
-.sample:hover, .sample[aria-pressed="true"] { border-color: var(--accent); }
-.sample[aria-pressed="true"] { background: var(--accent-soft); }
-.sample b { font-weight: 600; font-size: 14px; }
-.sample span { display: block; color: var(--muted); font-size: 13px; }
-label.lbl { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
-textarea { width: 100%; min-height: 280px; resize: vertical; border: 1px solid var(--border); border-radius: 8px; padding: 12px; background: var(--bg); color: var(--text); font: 13px/1.6 "JetBrains Mono", ui-monospace, monospace; }
-textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
-.row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
-.count { font-size: 12px; color: var(--muted); }
-.note { font-size: 12px; color: var(--muted); margin: 12px 0 0; }
-
-.empty { padding: 56px 24px; text-align: center; color: var(--muted); }
-.empty svg { color: var(--border); margin-bottom: 8px; }
-.loading { padding: 48px 24px; text-align: center; color: var(--muted); }
-.spinner { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 12px; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.error-box { margin: 18px; padding: 12px 14px; border-radius: 8px; background: var(--err-soft); color: var(--err); }
-
-.status { display: flex; gap: 12px; align-items: flex-start; padding: 16px 18px; border-bottom: 1px solid var(--border); }
-.status .ic { width: 34px; height: 34px; flex: none; border-radius: 9px; display: grid; place-items: center; font-weight: 700; }
-.status h3 { margin: 0; font-size: 17px; }
-.status p { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
-.s-ready .ic { background: var(--ok-soft); color: var(--ok); }
-.s-review .ic { background: var(--warn-soft); color: var(--warn); }
-.s-blocked .ic { background: var(--err-soft); color: var(--err); }
-
-.section { padding: 16px 18px; border-bottom: 1px solid var(--border); }
-.section:last-child { border-bottom: 0; }
-.section h4 { margin: 0 0 10px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
-.checks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.checks li { display: flex; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 14px; }
-.checks li .tag { flex: none; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: 2px 7px; border-radius: 5px; height: fit-content; margin-top: 1px; }
-.checks li b { display: block; }
-.checks li span { color: var(--muted); }
-.lv-error { background: var(--err-soft); } .lv-error .tag { background: var(--err); color: var(--surface); }
-.lv-warning { background: var(--warn-soft); } .lv-warning .tag { background: var(--warn); color: var(--surface); }
-.lv-info { background: var(--info-soft); } .lv-info .tag { background: var(--info); color: var(--surface); }
-.lv-ok { background: var(--ok-soft); } .lv-ok .tag { background: var(--ok); color: var(--surface); }
-
-.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
-.fact { background: var(--surface-2); border-radius: 8px; padding: 9px 12px; min-width: 0; }
-.fact small { display: block; color: var(--muted); font-size: 12px; }
-.fact div { font-weight: 600; overflow-wrap: anywhere; }
-
-.table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
-th { font-size: 12px; color: var(--muted); font-weight: 600; background: var(--surface-2); }
-td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
-td.desc { white-space: normal; min-width: 160px; }
-tr:last-child td { border-bottom: 0; }
-tr.flag-error td { background: var(--err-soft); }
-tr.flag-warning td { background: var(--warn-soft); }
-tr.total td { font-weight: 600; background: var(--surface-2); }
-.muted { color: var(--muted); }
-.mini { font-size: 12px; color: var(--muted); }
-
-.tabs { display: flex; gap: 6px; }
-.tab { border: 1px solid var(--border); background: transparent; color: var(--muted); border-radius: 6px; padding: 4px 10px; font: inherit; font-size: 13px; cursor: pointer; }
-.tab[aria-selected="true"] { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
-pre.json { margin: 0; padding: 16px 18px; overflow: auto; max-height: 640px; font: 12.5px/1.6 "JetBrains Mono", ui-monospace, monospace; background: var(--surface-2); border-radius: 0 0 12px 12px; }
-
-footer { border-top: 1px solid var(--border); background: var(--surface); }
-footer .wrap { padding: 28px 16px; display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; align-items: center; }
-footer h3 { margin: 0 0 4px; font-size: 17px; }
-footer p { margin: 0; color: var(--muted); font-size: 14px; max-width: 620px; }
-
-@media (max-width: 900px) {
-  .grid { grid-template-columns: minmax(0, 1fr); }
-  .input-card { position: static; }
-  .steps { grid-template-columns: 1fr; }
-  .brand small { display: none; }
-}
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="kit.css?v=7">
+<link rel="stylesheet" href="app.css?v=7">
 </head>
 <body>
-<header class="top">
-  <div class="wrap">
-    <div class="brand">
-      <span class="mark"><svg width="16" height="16" viewBox="0 0 32 32"><path d="M8 17l5 5 11-13" stroke="white" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-      Clean Data <small>· live demo by Frank A.</small>
+<nav class="nav">
+  <div class="wrap nav-row">
+    <a class="logo" href="#top"><span class="logo-mark"><i data-icon="scan-line"></i></span><span>Clean Data<small>AI data extraction demo</small></span></a>
+    <div class="nav-links">
+      <a href="#try">Try it</a><a href="#how">How it works</a><a href="#faq">Questions</a>
+      <a class="btn btn-dark btn-sm" href="https://www.upwork.com/freelancers/~0170dd39761ac49004" target="_blank" rel="noopener">Hire me</a>
     </div>
-    <a class="btn small" href="https://www.upwork.com/freelancers/~0170dd39761ac49004" target="_blank" rel="noopener">Hire me on Upwork</a>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow"><span class="dot"><i data-icon="sparkles"></i></span>Live demo for busy offices</span>
+      <h1>Stop retyping <span class="mark">messy</span> reports and invoices.</h1>
+      <p class="lede">Paste any business message, like a staff WhatsApp report, an invoice email or a customer order. AI pulls out the numbers, and simple checks catch the mistakes before they reach your books.</p>
+      <div class="hero-cta">
+        <button type="button" class="btn btn-primary" data-sample="whatsapp-sales"><i data-icon="play"></i>See it catch a mistake</button>
+        <a class="btn btn-line" href="#try"><i data-icon="clipboard-paste"></i>Paste your own</a>
+      </div>
+      <ul class="benefits">
+        <li><span class="tick"><i data-icon="check"></i></span>Totals that don't add up</li>
+        <li><span class="tick"><i data-icon="check"></i></span>Missing cash</li>
+        <li><span class="tick"><i data-icon="check"></i></span>Items entered twice</li>
+        <li><span class="tick"><i data-icon="check"></i></span>Ready for your spreadsheet</li>
+      </ul>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <div class="ha-msg">
+        <div class="ha-head"><span class="wa"><i data-icon="message-square"></i></span><b>Bar staff group</b><small>8:42 AM</small></div>
+        <p>Sales report Fri 🙏<br>Hennessy 2 @ 45k = 90,000<br>Heineken 24 @ 1500 = 36,000<br>Shisha 3 @ 15k = 45,000<br><span class="dup">Heineken 24 @ 1500 = 36,000</span><br><b>Total = 212,000</b><br>POS 150k, Cash 57k</p>
+        <div class="scan"></div>
+      </div>
+      <div class="ha-arrow"><i data-icon="arrow-right"></i></div>
+      <div class="ha-table">
+        <div class="ht-row h"><span>Item</span><span>Amount</span></div>
+        <div class="ht-row r1"><span>Hennessy × 2</span><span>₦90,000</span></div>
+        <div class="ht-row r2"><span>Heineken × 24</span><span>₦36,000</span></div>
+        <div class="ht-row r3"><span>Shisha × 3</span><span>₦45,000</span></div>
+        <div class="ht-row r4 bad"><span>Heineken × 24</span><span class="flag">Twice?</span></div>
+        <div class="ht-alert"><i data-icon="alert-octagon"></i>₦5,000 missing</div>
+      </div>
+    </div>
   </div>
 </header>
 
-<main class="wrap">
-  <section class="hero">
-    <h1>Turn messy business messages into clean, checked records.</h1>
-    <p>Paste a WhatsApp sales report, an invoice email or a supplier order. AI reads it, plain code checks every number, and anything doubtful is flagged for a person to approve.</p>
-    <div class="steps">
-      <div class="step"><b><span class="n">1</span>AI reads</b><span>Pulls out dates, items, totals and payments, exactly as written.</span></div>
-      <div class="step"><b><span class="n">2</span>Rules check</b><span>Line maths, totals, payments and duplicates are verified by code, not by the AI.</span></div>
-      <div class="step"><b><span class="n">3</span>You approve</b><span>Clean records are ready to save. Anything uncertain waits for review.</span></div>
+<main>
+  <section class="section" id="try">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="tag"><i data-icon="scan-line"></i>Try it</span>
+        <h2>Pick a message and watch what it finds</h2>
+        <p>Each sample is a real-looking business message with typical mistakes in it. Or paste your own text.</p>
+      </div>
+
+      <ol class="wizard" id="wizard">
+        <li class="on" data-step="1"><span>1</span>Pick a message</li>
+        <li data-step="2"><span>2</span>AI reads it</li>
+        <li data-step="3"><span>3</span>Checks catch the mistakes</li>
+      </ol>
+
+      <div class="demo">
+        <div class="pick card">
+          <h3>Sample messages</h3>
+          <div class="samples" id="samples"></div>
+          <div class="own">
+            <label for="text"><i data-icon="clipboard-paste"></i>Or paste your own</label>
+            <textarea id="text" spellcheck="false" placeholder="Paste a report, invoice, receipt or order message…" maxlength="6000"></textarea>
+            <div class="own-row"><span class="count" id="count">0 / 6,000</span><button type="button" class="btn btn-primary" id="go"><i data-icon="scan-line"></i>Read and check it</button></div>
+            <div id="aiNotice"></div>
+            <p class="tiny">Your text goes to the AI for reading and isn't saved here. Please don't paste real personal details.</p>
+          </div>
+        </div>
+
+        <div class="result card" id="result" aria-live="polite">
+          <div class="placeholder">
+            <div class="ph-art"><span><i data-icon="message-square"></i></span><i data-icon="arrow-right" class="ph-arrow"></i><span><i data-icon="table-2"></i></span></div>
+            <h3>Results show up here</h3>
+            <p>Pick a sample on the left. You'll see the record it pulled out and every check it ran.</p>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
-  <div class="grid">
-    <section class="card input-card" aria-labelledby="in-h">
-      <div class="card-h"><h2 id="in-h">Input</h2></div>
-      <div class="card-b">
-        <div class="samples" id="samples" role="group" aria-label="Sample texts"></div>
-        <label class="lbl" for="text">Or paste your own text</label>
-        <textarea id="text" spellcheck="false" placeholder="Paste a report, invoice, receipt or order message…"></textarea>
-        <div class="row">
-          <span class="count" id="count">0 / 6,000</span>
-          <button class="btn primary" id="go" type="button">Extract &amp; check</button>
-        </div>
-        <p class="note">Your text is sent to Anthropic's Claude for extraction. It isn't written to disk here. Please don't paste real personal data.</p>
+  <section class="section section-alt" id="how">
+    <div class="wrap">
+      <div class="section-head center reveal"><span class="tag"><i data-icon="lightbulb"></i>How it works</span><h2>AI reads, rules check, you approve</h2><p>The AI is great at reading messy text. It's not trusted with the maths, so plain code checks every number.</p></div>
+      <div class="steps">
+        <div class="step card reveal"><span class="step-num">1</span><span class="step-icon"><i data-icon="scan-line"></i></span><h3>AI reads the message</h3><p>It copies every item, amount, date and payment exactly as written, mistakes included.</p></div>
+        <div class="step card reveal"><span class="step-num">2</span><span class="step-icon"><i data-icon="calculator"></i></span><h3>Code checks the numbers</h3><p>Line totals, the grand total, payments received and repeated items are all verified.</p></div>
+        <div class="step card reveal"><span class="step-num">3</span><span class="step-icon"><i data-icon="badge-check"></i></span><h3>Clean records go through</h3><p>Correct records are saved automatically. Anything doubtful waits for a person to look at.</p></div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <section class="card" id="out" aria-live="polite" aria-labelledby="out-h">
-      <div class="card-h">
-        <h2 id="out-h">Result</h2>
-        <div class="tabs" id="tabs" hidden>
-          <button class="tab" role="tab" aria-selected="true" data-view="table">Table</button>
-          <button class="tab" role="tab" aria-selected="false" data-view="json">JSON</button>
-          <button class="btn small" id="csv" type="button">CSV</button>
-        </div>
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head reveal"><span class="tag"><i data-icon="trophy"></i>What you get</span><h2>Fewer typing hours, fewer costly mistakes</h2></div>
+      <div class="features">
+        <div class="feature card reveal"><span class="feature-icon"><i data-icon="message-square"></i></span><div><h3>From WhatsApp, email or PDFs</h3><p>Staff reports, supplier invoices, receipts, order messages and forms.</p></div></div>
+        <div class="feature card reveal"><span class="feature-icon"><i data-icon="table-2"></i></span><div><h3>Into the tools you use</h3><p>Google Sheets, QuickBooks, Airtable, your CRM or your own database.</p></div></div>
+        <div class="feature card reveal"><span class="feature-icon"><i data-icon="alert-triangle"></i></span><div><h3>Mistakes flagged, not hidden</h3><p>Missing money and wrong totals are shown to a person instead of being silently "fixed".</p></div></div>
+        <div class="feature card reveal"><span class="feature-icon"><i data-icon="calculator"></i></span><div><h3>Your own rules</h3><p>Tax rates, required fields, approval limits, whatever your business needs checked.</p></div></div>
+        <div class="feature card reveal"><span class="feature-icon"><i data-icon="receipt-text"></i></span><div><h3>Daily summaries</h3><p>A short end-of-day report of what came in and what needs attention.</p></div></div>
+        <div class="feature card reveal"><span class="feature-icon"><i data-icon="shield-check"></i></span><div><h3>Safe and affordable</h3><p>Fractions of a cent per message, with spending caps and privacy controls.</p></div></div>
       </div>
-      <div id="body">
-        <div class="empty">
-          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
-          <div>Pick a sample or paste your own text, then press <b>Extract &amp; check</b>.</div>
-        </div>
+    </div>
+  </section>
+
+  <section class="section section-alt" id="faq">
+    <div class="wrap">
+      <div class="section-head center reveal"><span class="tag"><i data-icon="info"></i>Questions</span><h2>What people usually ask</h2></div>
+      <div class="faq">
+        <details><summary>Will the AI "fix" a wrong total and hide the problem?<i data-icon="chevron-down"></i></summary><p>No. It's told to copy numbers exactly as written. Separate code then checks the maths, so a wrong total shows up as a problem instead of disappearing.</p></details>
+        <details><summary>Does it work with handwritten or photographed receipts?<i data-icon="chevron-down"></i></summary><p>Photos of printed receipts work well. Mostly handwritten documents are less reliable, so those are flagged for a person to check.</p></details>
+        <details><summary>Where does the data go afterwards?<i data-icon="chevron-down"></i></summary><p>Wherever you work: a Google Sheet, your accounting software, a CRM or your own database. Records that need checking wait in a short review list.</p></details>
+        <details><summary>How accurate is it?<i data-icon="chevron-down"></i></summary><p>I start every project with a small paid test on your real samples and give you an accuracy report before anything bigger is built.</p></details>
       </div>
-    </section>
-  </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="cta-band reveal">
+        <div><h2>Drowning in reports and invoices?</h2><p>Send me a few real examples of what your team retypes every day. I'll show you how much of it can be read and checked automatically.</p></div>
+        <a class="btn" href="https://www.upwork.com/freelancers/~0170dd39761ac49004" target="_blank" rel="noopener"><i data-icon="arrow-right"></i>Work with me on Upwork</a>
+      </div>
+    </div>
+  </section>
 </main>
 
-<footer>
-  <div class="wrap">
-    <div>
-      <h3>Need this for your own documents?</h3>
-      <p>I build extraction pipelines like this for real businesses: your inputs, your fields, your rules, saved into your database, Google Sheet or Laravel app. 6+ years building backend systems where the numbers must be right.</p>
-    </div>
-    <a class="btn primary" href="https://www.upwork.com/freelancers/~0170dd39761ac49004" target="_blank" rel="noopener">Work with me on Upwork</a>
-  </div>
-</footer>
+<footer class="foot"><div class="wrap foot-row"><span>Demo by Frank A., AI integration engineer. The sample businesses are fictional.</span><a href="https://github.com/madassdev/ai-data-extraction" target="_blank" rel="noopener">Source code on GitHub</a></div></footer>
 
-<script>
-const $ = (s) => document.querySelector(s);
-const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const MAX = 6000;
-let samples = [], current = null, view = 'table';
-
-const text = $('#text'), count = $('#count'), go = $('#go'), body = $('#body'), tabs = $('#tabs');
-
-function fmt(n, cur) {
-  if (n == null) return '<span class="muted">—</span>';
-  const s = Number(n).toLocaleString(undefined, { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 });
-  const sym = { NGN: '₦', USD: '$', GBP: '£', EUR: '€' }[cur] ?? '';
-  return (n < 0 ? '−' : '') + sym + s.replace('-', '');
-}
-function updateCount() {
-  count.textContent = `${text.value.length.toLocaleString()} / ${MAX.toLocaleString()}`;
-  count.style.color = text.value.length > MAX ? 'var(--err)' : '';
-}
-text.addEventListener('input', () => {
-  updateCount();
-  document.querySelectorAll('.sample').forEach((b) => b.setAttribute('aria-pressed', 'false'));
-});
-
-fetch('/api/samples').then((r) => r.json()).then((list) => {
-  samples = list;
-  $('#samples').innerHTML = list.map((s) =>
-    `<button class="sample" type="button" aria-pressed="false" data-id="${s.id}"><b>${esc(s.label)}</b><span>${esc(s.hint)}</span></button>`).join('');
-  document.querySelectorAll('.sample').forEach((b) => b.addEventListener('click', () => {
-    const s = samples.find((x) => x.id === b.dataset.id);
-    text.value = s.text; updateCount();
-    document.querySelectorAll('.sample').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-    run();
-  }));
-});
-
-go.addEventListener('click', run);
-text.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) run(); });
-
-async function solvePow() {
-  const ch = await (await fetch('/api/challenge')).json();
-  const worker = new Worker('pow-worker.js');
-  try {
-    const { nonce } = await new Promise((resolve, reject) => {
-      worker.onmessage = (e) => resolve(e.data);
-      worker.onerror = reject;
-      worker.postMessage({ salt: ch.salt, bits: ch.bits });
-    });
-    return { token: ch.token, nonce };
-  } finally {
-    worker.terminate();
-  }
-}
-
-async function run() {
-  const t = text.value.trim();
-  if (t.length < 10) { text.focus(); return; }
-  go.disabled = true; tabs.hidden = true;
-  body.innerHTML = '<div class="loading"><div class="spinner"></div>Reading the text and checking the numbers…</div>';
-  try {
-    // Custom text costs an AI call, so the browser first solves a short proof-of-work puzzle.
-    const payload = { text: t };
-    if (!samples.some((s) => s.text.trim() === t)) Object.assign(payload, await solvePow());
-    const r = await fetch('/api/extract', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
-    const data = await r.json();
-    if (!r.ok) throw new Error(data.error || 'Request failed');
-    current = data; render();
-    if (window.innerWidth < 900) $('#out').scrollIntoView({ behavior: 'smooth' });
-  } catch (e) {
-    current = null;
-    body.innerHTML = `<div class="error-box">${esc(e.message)}</div>`;
-  } finally { go.disabled = false; }
-}
-
-tabs.addEventListener('click', (e) => {
-  const v = e.target.dataset?.view; if (!v) return;
-  view = v;
-  tabs.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.view === v)));
-  render();
-});
-
-const STATUS = {
-  ready: ['✓', 'Ready to save', 'Every check passed. This record can go straight into your system.'],
-  review: ['!', 'Needs a quick review', 'Nothing is provably wrong, but something should be confirmed by a person first.'],
-  blocked: ['×', 'Numbers don\'t add up', 'This record is held back until someone fixes or explains the mismatch.'],
-};
-const TAG = { error: 'Error', warning: 'Check', info: 'Note', ok: 'Pass' };
-const LABEL = { sales_report: 'Sales report', invoice: 'Invoice', purchase_order: 'Order', expense_report: 'Expense report', receipt: 'Receipt', other: 'Other' };
-
-function render() {
-  if (!current) return;
-  tabs.hidden = false;
-  const { extraction: x, validation: v, meta, cached } = current;
-  if (view === 'json') {
-    body.innerHTML = `<pre class="json">${esc(JSON.stringify({ extraction: x, validation: v }, null, 2))}</pre>`;
-    return;
-  }
-  const cur = x.currency;
-  const rowFlag = new Map();
-  for (const c of v.checks) if (c.line != null && (!rowFlag.has(c.line) || c.level === 'error')) rowFlag.set(c.line, c.level);
-  const [ic, title, sub] = STATUS[v.status];
-  const order = { error: 0, warning: 1, info: 2, ok: 3 };
-  const checks = [...v.checks].sort((a, b) => order[a.level] - order[b.level]);
-
-  const lines = x.line_items.map((li, i) => `
-    <tr class="${rowFlag.has(i) ? 'flag-' + rowFlag.get(i) : ''}">
-      <td class="mini">${i + 1}</td><td class="desc">${esc(li.description)}</td>
-      <td class="num">${li.quantity ?? '<span class="muted">—</span>'}</td>
-      <td class="num">${fmt(li.unit_price, cur)}</td><td class="num">${fmt(li.amount, cur)}</td>
-    </tr>`).join('');
-  const adj = x.adjustments.map((a) => `<tr><td></td><td class="desc muted">${esc(a.label)}</td><td></td><td></td><td class="num">${fmt(a.amount, cur)}</td></tr>`).join('');
-
-  body.innerHTML = `
-    <div class="status s-${v.status}"><div class="ic">${ic}</div><div><h3>${title}</h3><p>${sub}</p></div></div>
-    <div class="section"><h4>Checks</h4><ul class="checks">
-      ${checks.map((c) => `<li class="lv-${c.level}"><span class="tag">${TAG[c.level]}</span><div><b>${esc(c.title)}</b><span>${esc(c.detail)}</span></div></li>`).join('') || '<li class="lv-info"><span class="tag">Note</span><div><b>No checks applied</b><span>No amounts were found.</span></div></li>'}
-    </ul></div>
-    <div class="section"><h4>Record</h4><div class="facts">
-      <div class="fact"><small>Type</small><div>${esc(LABEL[x.document_type])}</div></div>
-      <div class="fact"><small>Date</small><div>${esc(x.date ?? '—')}</div></div>
-      <div class="fact"><small>Currency</small><div>${esc(cur ?? '—')}</div></div>
-      ${x.parties.map((p) => `<div class="fact"><small>${esc(p.role)}</small><div>${esc(p.name)}</div></div>`).join('')}
-    </div></div>
-    ${x.line_items.length ? `<div class="section"><h4>Lines</h4><div class="table-wrap"><table>
-      <thead><tr><th>#</th><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th><th class="num">Amount</th></tr></thead>
-      <tbody>${lines}${adj}
-        <tr class="total"><td></td><td>Stated total</td><td></td><td></td><td class="num">${fmt(x.stated_total, cur)}</td></tr>
-        <tr class="total"><td></td><td>Calculated total</td><td></td><td></td><td class="num">${fmt(v.computed_total, cur)}</td></tr>
-      </tbody></table></div></div>` : ''}
-    ${x.payments.length ? `<div class="section"><h4>Payments</h4><div class="facts">
-      ${x.payments.map((p) => `<div class="fact"><small>${esc(p.method)}</small><div>${fmt(p.amount, cur)}</div></div>`).join('')}
-    </div></div>` : ''}
-    ${x.other_fields.length ? `<div class="section"><h4>Other details</h4><div class="facts">
-      ${x.other_fields.map((f) => `<div class="fact"><small>${esc(f.name)}</small><div>${esc(f.value)}</div></div>`).join('')}
-    </div></div>` : ''}
-    <div class="section mini">${current.sample ? 'Sample: saved extraction, checks run live in code' : `${cached ? 'Served from cache' : `Extracted in ${(meta.ms / 1000).toFixed(1)}s`} · ${esc(meta.model)} · checks run in code`}</div>`;
-}
-
-$('#csv').addEventListener('click', () => {
-  if (!current) return;
-  const x = current.extraction;
-  const q = (s) => `"${String(s ?? '').replace(/"/g, '""')}"`;
-  const rows = [['date', 'currency', 'description', 'quantity', 'unit_price', 'amount'].join(',')]
-    .concat(x.line_items.map((li) => [x.date, x.currency, li.description, li.quantity, li.unit_price, li.amount].map(q).join(',')));
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([rows.join('\n')], { type: 'text/csv' }));
-  a.download = 'extracted-lines.csv'; a.click();
-  URL.revokeObjectURL(a.href);
-});
-updateCount();
-</script>
+<script src="app.js?v=7" type="module"></script>
 </body>
 </html>
