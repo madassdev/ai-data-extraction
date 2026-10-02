@@ -4,22 +4,22 @@ export const samples = [
     id: 'whatsapp-sales',
     label: 'WhatsApp sales report',
     hint: 'Bar staff report with a duplicate line and missing money',
-    text: `Good morning sir 🙏 Sales report for Fri 26/09/2026
+    text: `Hey boss 👋 sales for Fri 9/26
 
-Hennessy VS 2 btl @ 45,000 = 90,000
-Smirnoff Ice x 12 @ 2,500 = 30,000
-Heineken 24 @ 1500 = 36,000
-Chapman 6 @ 3,000 = 18,000
-Shisha 3 @ 15,000 = 45,000
-Heineken 24 @ 1500 = 36,000
+Hennessy VS 2 btl @ $250 = $500
+Margaritas x 18 @ $12 = $216
+Heineken 24 @ $7 = $168
+Wings 6 @ $15 = $90
+Nachos 5 @ $12 = $60
+Heineken 24 @ $7 = $168
 
-Total = 260,000
-POS - 180,000
-Cash - 60,000
-Transfer - 15,000
-Tips 5k (staff)
+Total = $1,252
+Card - $950
+Cash - $200
+Venmo - $52
+Tips $85 (staff)
 
-- Kemi, Blue Room Lounge`,
+- Jess, Blue Room Lounge`,
   },
   {
     id: 'invoice-email',
@@ -42,7 +42,7 @@ Loyalty discount -10% ($88.50)
 Total due: $796.50
 
 Thanks!
-Ade`,
+Mike`,
   },
   {
     id: 'supplier-order',
@@ -57,6 +57,6 @@ Ade`,
 delivery £15
 
 total should be £241 i think
-pay on delivery cash. thanks - Tunde, Mama's Kitchen`,
+pay on delivery cash. thanks - Tony, Mama's Kitchen`,
   },
 ];

@@ -1,4 +1,4 @@
-import { $, $$, esc, sleep, loadIcons, hydrateIcons, icon, toast, Guide, reveal, solveChallenge, postJson, reducedMotion } from './kit.js?v=7';
+import { $, $$, esc, sleep, loadIcons, hydrateIcons, icon, toast, Guide, reveal, solveChallenge, postJson, reducedMotion } from './kit.js?v=8';
 
 const MAX = 6000;
 const SAMPLE_META = {

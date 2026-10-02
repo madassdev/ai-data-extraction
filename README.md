@@ -18,7 +18,7 @@ LLMs are good at reading messy text and bad at being trusted with arithmetic. So
 
 Each record comes out as **ready**, **needs review** or **blocked**.
 
-![Blocked vs ready](docs/blocked-vs-ready.png)
+![A clean invoice that passes every check](docs/ready.png)
 
 ## Stack
 

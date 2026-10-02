@@ -2,20 +2,20 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { runChecks } from './checks.mjs';
 
-const base = { document_type: 'other', title: '', date: '2026-09-26', currency: 'NGN', parties: [], adjustments: [], stated_total: null, payments: [], other_fields: [], uncertain: [] };
+const base = { document_type: 'other', title: '', date: '2026-09-26', currency: 'USD', parties: [], adjustments: [], stated_total: null, payments: [], other_fields: [], uncertain: [] };
 const li = (description, quantity, unit_price, amount) => ({ description, quantity, unit_price, amount, source_text: '' });
 const levels = (r) => r.checks.map((c) => `${c.level}:${c.title}`);
 
 test('sales report: duplicate line, total and payment mismatch', () => {
   const r = runChecks({
     ...base,
-    line_items: [li('Hennessy VS', 2, 45000, 90000), li('Smirnoff Ice', 12, 2500, 30000), li('Heineken', 24, 1500, 36000),
-      li('Chapman', 6, 3000, 18000), li('Shisha', 3, 15000, 45000), li('Heineken', 24, 1500, 36000)],
-    stated_total: 260000,
-    payments: [{ method: 'POS', amount: 180000 }, { method: 'Cash', amount: 60000 }, { method: 'Transfer', amount: 15000 }],
+    line_items: [li('Hennessy VS', 2, 250, 500), li('Margaritas', 18, 12, 216), li('Heineken', 24, 7, 168),
+      li('Wings', 6, 15, 90), li('Nachos', 5, 12, 60), li('Heineken', 24, 7, 168)],
+    stated_total: 1252,
+    payments: [{ method: 'Card', amount: 950 }, { method: 'Cash', amount: 200 }, { method: 'Venmo', amount: 52 }],
   });
   assert.equal(r.status, 'blocked');
-  assert.equal(r.computed_total, 255000);
+  assert.equal(r.computed_total, 1202);
   assert.ok(levels(r).includes('warning:Possible duplicate line'));
   assert.ok(levels(r).includes('error:Total does not match the lines'));
   assert.ok(levels(r).includes("error:Payments don't match the total"));

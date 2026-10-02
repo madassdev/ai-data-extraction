@@ -28,7 +28,7 @@ const Extraction = z.object({
   document_type: z.enum(['sales_report', 'invoice', 'purchase_order', 'expense_report', 'receipt', 'other']),
   title: z.string().describe('Short human title, e.g. "Sales report, 26 Sep 2026"'),
   date: z.string().nullable().describe('ISO date YYYY-MM-DD, or null if not stated'),
-  currency: z.string().nullable().describe('ISO 4217 code, e.g. NGN, USD, GBP'),
+  currency: z.string().nullable().describe('ISO 4217 code, e.g. USD, GBP, EUR'),
   parties: z.array(z.object({ role: z.string(), name: z.string() })),
   line_items: z.array(z.object({
     description: z.string(),
