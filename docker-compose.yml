@@ -1,0 +1,13 @@
+services:
+  app:
+    build: .
+    container_name: extract-demo
+    restart: unless-stopped
+    mem_limit: 192m
+    env_file: .env
+    networks:
+      - web
+
+networks:
+  web:
+    external: true
