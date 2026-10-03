@@ -9,13 +9,13 @@ const levels = (r) => r.checks.map((c) => `${c.level}:${c.title}`);
 test('sales report: duplicate line, total and payment mismatch', () => {
   const r = runChecks({
     ...base,
-    line_items: [li('Hennessy VS', 2, 250, 500), li('Margaritas', 18, 12, 216), li('Heineken', 24, 7, 168),
-      li('Wings', 6, 15, 90), li('Nachos', 5, 12, 60), li('Heineken', 24, 7, 168)],
-    stated_total: 1252,
-    payments: [{ method: 'Card', amount: 950 }, { method: 'Cash', amount: 200 }, { method: 'Venmo', amount: 52 }],
+    line_items: [li('Lattes', 60, 5, 300), li('Croissants', 48, 4, 192), li('Bagels', 36, 3, 108),
+      li('Smoothies', 25, 7, 175), li('Muffins', 30, 3, 90), li('Bagels', 36, 3, 108)],
+    stated_total: 1023,
+    payments: [{ method: 'Card', amount: 800 }, { method: 'Cash', amount: 150 }, { method: 'Venmo', amount: 23 }],
   });
   assert.equal(r.status, 'blocked');
-  assert.equal(r.computed_total, 1202);
+  assert.equal(r.computed_total, 973);
   assert.ok(levels(r).includes('warning:Possible duplicate line'));
   assert.ok(levels(r).includes('error:Total does not match the lines'));
   assert.ok(levels(r).includes("error:Payments don't match the total"));

@@ -1,8 +1,8 @@
-import { $, $$, esc, sleep, loadIcons, hydrateIcons, icon, toast, Guide, reveal, solveChallenge, postJson, reducedMotion } from './kit.js?v=9';
+import { $, $$, esc, sleep, loadIcons, hydrateIcons, icon, toast, Guide, reveal, solveChallenge, postJson, reducedMotion } from './kit.js?v=10';
 
 const MAX = 6000;
 const SAMPLE_META = {
-  'whatsapp-sales': { icon: 'message-square', cls: 'whatsapp', title: 'WhatsApp sales report', sub: 'Sent by bar staff', badge: ['badge-bad', '3 problems'] },
+  'whatsapp-sales': { icon: 'message-square', cls: 'whatsapp', title: 'WhatsApp sales report', sub: 'Sent by café staff', badge: ['badge-bad', '3 problems'] },
   'invoice-email': { icon: 'mail', cls: 'email', title: 'Invoice email', sub: 'From a web agency', badge: ['badge-ok', 'All correct'] },
   'supplier-order': { icon: 'package', cls: 'chat', title: 'Supplier order chat', sub: 'From a restaurant', badge: ['badge-warn', '1 problem'] },
 };
@@ -12,7 +12,7 @@ const els = { samples: $('#samples'), text: $('#text'), count: $('#count'), go: 
 const guide = new Guide({
   key: 'extract', title: 'Your demo checklist', openWhen: '#try',
   missions: [
-    { id: 'whatsapp-sales', title: 'Catch missing money', hint: 'A bar report where the cash doesn\'t add up.', action: { label: 'Show me', run: () => runSample('whatsapp-sales') } },
+    { id: 'whatsapp-sales', title: 'Catch missing money', hint: 'A café report where the cash doesn\'t add up.', action: { label: 'Show me', run: () => runSample('whatsapp-sales') } },
     { id: 'invoice-email', title: 'Watch a clean invoice pass', hint: 'Everything adds up, so it\'s ready to save.', action: { label: 'Show me', run: () => runSample('invoice-email') } },
     { id: 'supplier-order', title: 'Spot a wrong line', hint: 'The total looks fine, but one line is miscalculated.', action: { label: 'Show me', run: () => runSample('supplier-order') } },
     { id: 'data', title: 'See the clean data', hint: 'Open the JSON view or download the CSV.', action: { label: 'Show me', run: () => { if (!state.current) runSample('invoice-email'); else setView('json'); } } },

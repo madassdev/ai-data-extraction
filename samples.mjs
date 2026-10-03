@@ -3,23 +3,23 @@ export const samples = [
   {
     id: 'whatsapp-sales',
     label: 'WhatsApp sales report',
-    hint: 'Bar staff report with a duplicate line and missing money',
+    hint: 'Café staff report with a duplicate line and missing money',
     text: `Hey boss 👋 sales for Fri 9/26
 
-Hennessy VS 2 btl @ $250 = $500
-Margaritas x 18 @ $12 = $216
-Heineken 24 @ $7 = $168
-Wings 6 @ $15 = $90
-Nachos 5 @ $12 = $60
-Heineken 24 @ $7 = $168
+Lattes 60 @ $5 = $300
+Croissants x 48 @ $4 = $192
+Bagels 36 @ $3 = $108
+Smoothies 25 @ $7 = $175
+Muffins 30 @ $3 = $90
+Bagels 36 @ $3 = $108
 
-Total = $1,252
-Card - $950
-Cash - $200
-Venmo - $52
-Tips $85 (staff)
+Total = $1,023
+Card - $800
+Cash - $150
+Venmo - $23
+Tips $45 (staff)
 
-- Jess, Blue Room Lounge`,
+- Jess, Blue Door Café`,
   },
   {
     id: 'invoice-email',
