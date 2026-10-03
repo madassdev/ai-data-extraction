@@ -3,7 +3,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
-COPY server.mjs checks.mjs samples.mjs fixtures.mjs pow.mjs ./
+COPY *.mjs ./
 COPY public ./public
 USER node
 EXPOSE 5180

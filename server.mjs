@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import express from 'express';
 import rateLimit from 'express-rate-limit';
-import Anthropic from '@anthropic-ai/sdk';
+import { PROVIDER, MODEL, anthropic, openai, costAnthropic, costOpenAi, probe, classifyError } from './llm.mjs';
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
 import { z } from 'zod';
 import { runChecks } from './checks.mjs';
@@ -10,19 +10,10 @@ import { fixtures } from './fixtures.mjs';
 import { issueChallenge, verifyChallenge } from './pow.mjs';
 
 const PORT = Number(process.env.PORT ?? 5180);
-const MODEL = process.env.MODEL ?? 'claude-opus-5';
 const MAX_CHARS = Number(process.env.MAX_CHARS ?? 6000);
 const DAILY_LIMIT = Number(process.env.DAILY_LIMIT ?? 50);
 const DAILY_BUDGET_USD = Number(process.env.DAILY_BUDGET_USD ?? 1);
 const AI_ENABLED = process.env.AI_ENABLED !== 'false';
-// USD per million tokens [input, output], for the daily budget estimate.
-const PRICES = { 'claude-opus-5': [5, 25], 'claude-opus-5-5': [4, 20], 'claude-sonnet-5': [2, 10], 'claude-haiku-4-5': [1, 5] };
-const costOf = (u) => {
-  const [i, o] = PRICES[MODEL] ?? PRICES['claude-opus-5'];
-  return (((u.input_tokens ?? 0) + (u.cache_creation_input_tokens ?? 0) * 1.25 + (u.cache_read_input_tokens ?? 0) * 0.1) * i + (u.output_tokens ?? 0) * o) / 1e6;
-};
-
-const client = new Anthropic({ timeout: 60_000, maxRetries: 1 });
 
 const Extraction = z.object({
   document_type: z.enum(['sales_report', 'invoice', 'purchase_order', 'expense_report', 'receipt', 'other']),
@@ -58,6 +49,41 @@ Rules:
 - Use null rather than guessing. When you had to interpret something ambiguous (a missing year, an unclear unit, a guessed currency), add it to uncertain with a short reason.
 - If the text contains no business record, return document_type "other" with empty arrays and explain in uncertain.`;
 
+// OpenAI structured outputs need every object closed and every field required (nullable is fine).
+function strictSchema(node) {
+  if (Array.isArray(node)) return node.map(strictSchema);
+  if (!node || typeof node !== 'object') return node;
+  const out = Object.fromEntries(Object.entries(node).filter(([k]) => k !== '$schema').map(([k, v]) => [k, strictSchema(v)]));
+  if (out.type === 'object' && out.properties) { out.additionalProperties = false; out.required = Object.keys(out.properties); }
+  return out;
+}
+const EXTRACTION_SCHEMA = strictSchema(z.toJSONSchema(Extraction));
+
+/** Read one text into an Extraction. Returns { data (null on refusal), cost }. */
+async function extractRecord(text) {
+  if (PROVIDER === 'openai') {
+    const r = await openai().chat.completions.create({
+      model: MODEL,
+      max_completion_tokens: 8000,
+      messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: text }],
+      response_format: { type: 'json_schema', json_schema: { name: 'extraction', strict: true, schema: EXTRACTION_SCHEMA } },
+    });
+    const msg = r.choices[0].message;
+    const cost = costOpenAi(r.usage);
+    if (msg.refusal || !msg.content) return { data: null, cost };
+    const parsed = Extraction.safeParse(JSON.parse(msg.content));
+    return { data: parsed.success ? parsed.data : null, cost };
+  }
+  const r = await anthropic().messages.parse({
+    model: MODEL,
+    max_tokens: 8000,
+    system: SYSTEM,
+    messages: [{ role: 'user', content: text }],
+    output_config: { effort: 'low', format: zodOutputFormat(Extraction) },
+  });
+  return { data: r.stop_reason === 'refusal' ? null : r.parsed_output, cost: costAnthropic(r.usage) };
+}
+
 // Results for identical text are reused, so sample clicks cost nothing after the first run.
 const cache = new Map();
 const CACHE_MAX = 300;
@@ -80,14 +106,7 @@ app.get('/health', (_req, res) => res.json({ ok: true }));
 // Is the AI provider usable? A 1-token probe at start and every 15 minutes (refused, and free,
 // when there's no credit). The page uses it to steer visitors to the samples.
 const aiHealth = { ok: null };
-async function probeAi() {
-  try {
-    await client.messages.create({ model: 'claude-haiku-4-5', max_tokens: 1, messages: [{ role: 'user', content: 'ok' }] });
-    aiHealth.ok = true;
-  } catch (err) {
-    aiHealth.ok = !(err instanceof Anthropic.AuthenticationError || (err instanceof Anthropic.BadRequestError && /credit balance/i.test(err.message)));
-  }
-}
+async function probeAi() { aiHealth.ok = await probe(); }
 if (AI_ENABLED) { probeAi(); setInterval(probeAi, 15 * 60_000).unref(); }
 app.get('/api/status', (_req, res) => res.json({
   ai: !AI_ENABLED ? 'disabled' : usedToday >= DAILY_LIMIT || spentToday >= DAILY_BUDGET_USD ? 'daily_limit' : aiHealth.ok === false ? 'paused' : 'ok',
@@ -129,20 +148,9 @@ app.post('/api/extract', limiter, async (req, res) => {
 
   const started = Date.now();
   try {
-    const response = await client.messages.parse({
-      model: MODEL,
-      max_tokens: 8000,
-      system: SYSTEM,
-      messages: [{ role: 'user', content: text }],
-      output_config: { effort: 'low', format: zodOutputFormat(Extraction) },
-    });
-
-    spentToday += costOf(response.usage);
-    if (response.stop_reason === 'refusal' || !response.parsed_output) {
-      return res.status(422).json({ error: 'The model could not read this text as a business record.' });
-    }
-
-    const extraction = response.parsed_output;
+    const { data: extraction, cost } = await extractRecord(text);
+    spentToday += cost;
+    if (!extraction) return res.status(422).json({ error: 'The model could not read this text as a business record.' });
     const result = {
       extraction,
       validation: runChecks(extraction),
@@ -153,16 +161,15 @@ app.post('/api/extract', limiter, async (req, res) => {
     res.json(result);
   } catch (err) {
     usedToday = Math.max(0, usedToday - 1);
-    if (err instanceof Anthropic.RateLimitError) {
-      return res.status(503).json({ error: 'The AI service is busy. Try again in a minute.' });
-    }
-    if (err instanceof Anthropic.BadRequestError && /credit balance/i.test(err.message)) {
-      console.error('anthropic: out of credit');
+    const kind = classifyError(err);
+    if (kind === 'busy') return res.status(503).json({ error: 'The AI service is busy. Try again in a minute.' });
+    if (kind === 'no_credit') {
+      console.error(`${PROVIDER}: key rejected or out of credit`);
       aiHealth.ok = false;
       return res.status(503).json({ error: 'Live reading of your own text is paused right now. The three samples still work.', paused: true });
     }
-    if (err instanceof Anthropic.APIError) {
-      console.error('anthropic error', err.status, err.message);
+    if (kind === 'api') {
+      console.error(`${PROVIDER} error`, err.status, err.message);
       return res.status(502).json({ error: 'The AI service returned an error. Try again shortly.' });
     }
     console.error(err);
@@ -170,4 +177,4 @@ app.post('/api/extract', limiter, async (req, res) => {
   }
 });
 
-app.listen(PORT, () => console.log(`extract demo on :${PORT} using ${MODEL}; AI ${AI_ENABLED ? 'on' : 'off'}`));
+app.listen(PORT, () => console.log(`extract demo on :${PORT} using ${PROVIDER} ${MODEL}; AI ${AI_ENABLED ? 'on' : 'off'}`));
