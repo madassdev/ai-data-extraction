@@ -2,7 +2,7 @@
 
 **Live demo:** https://extract.frankonline.cloud
 
-Paste a messy WhatsApp sales report, invoice email or supplier order chat. Claude extracts a structured record **exactly as written**, then plain code checks every number. Anything doubtful is flagged for a person instead of slipping into your books.
+Paste a messy WhatsApp sales report, invoice email or supplier order chat. An LLM extracts a structured record **exactly as written**, then plain code checks every number. Anything doubtful is flagged for a person instead of slipping into your books.
 
 ![Demo](docs/screenshot.png)
 
@@ -22,7 +22,7 @@ Each record comes out as **ready**, **needs review** or **blocked**.
 
 ## Stack
 
-Node 22, Express 5, Anthropic SDK structured outputs (`messages.parse` + a Zod schema), plain HTML/CSS/JS, Docker + Caddy.
+Node 22, Express 5, structured outputs from OpenAI (strict JSON schema) or Anthropic (`messages.parse`), both from one Zod schema. The model runs through `llm.mjs`, a small adapter that speaks OpenAI or Anthropic (`PROVIDER`); the live demo uses OpenAI `gpt-4.1-mini`., plain HTML/CSS/JS, Docker + Caddy.
 
 The three samples use saved extractions, so they cost nothing; the checks still run live on them. Custom text calls the API behind a proof-of-work check, a per-IP rate limit, a daily call and dollar cap, and an `AI_ENABLED` kill switch.
 
@@ -30,7 +30,7 @@ The three samples use saved extractions, so they cost nothing; the checks still 
 
 ```bash
 npm install
-cp .env.example .env   # add ANTHROPIC_API_KEY
+cp .env.example .env   # add OPENAI_API_KEY (or ANTHROPIC_API_KEY with PROVIDER=anthropic)
 node --env-file=.env server.mjs   # http://localhost:5180
 node --test
 ```
